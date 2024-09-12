@@ -46,6 +46,10 @@ fn process_deposit_transcation(
     transaction: Transaction,
     transactions: &mut TransactionsMap,
 ) {
+    if transactions.contains_key(&transaction.transaction_id()) {
+        error!("Duplicate transaction ID: {:?}", transaction);
+        return;
+    }
     if let Some(amount) = transaction.amount() {
         account.add(amount);
         transactions.insert(transaction.transaction_id(), transaction);
@@ -62,6 +66,10 @@ fn process_withdraw_transaction(
     transaction: Transaction,
     transactions: &mut TransactionsMap,
 ) {
+    if transactions.contains_key(&transaction.transaction_id()) {
+        error!("Duplicate transaction ID: {:?}", transaction);
+        return;
+    }
     if let Some(amount) = transaction.amount() {
         account.subtract(amount);
         transactions.insert(transaction.transaction_id(), transaction);
