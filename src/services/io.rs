@@ -3,6 +3,7 @@ use crate::models::account::Account;
 use crate::models::id::{ClientID, TransactionID};
 use crate::models::transaction::Transaction;
 use csv::ReaderBuilder;
+use log::error;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::Write;
@@ -20,7 +21,7 @@ pub fn read_transactions(input_file: &str) -> Result<Vec<Account>, Box<dyn Error
     for result in reader.deserialize::<Transaction>() {
         match result {
             Ok(transaction) => process_transaction(transaction, &mut accounts, &mut transactions),
-            Err(e) => eprintln!("Failed to parse transaction: {}", e),
+            Err(e) => error!("Failed to parse transaction: {}", e),
         }
     }
 

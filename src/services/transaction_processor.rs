@@ -3,6 +3,7 @@ use super::io::TransactionsMap;
 use crate::models::account::Account;
 use crate::models::transaction::Transaction;
 use crate::models::transaction::TransactionType;
+use log::error;
 
 pub fn process_transaction(
     transaction: Transaction,
@@ -48,6 +49,8 @@ fn process_deposit_transcation(
     if let Some(amount) = transaction.amount() {
         account.add(amount);
         transactions.insert(transaction.transaction_id(), transaction);
+    } else {
+        error!("Failed to get amount: {:?}", transaction);
     }
 }
 
@@ -62,6 +65,8 @@ fn process_withdraw_transaction(
     if let Some(amount) = transaction.amount() {
         account.subtract(amount);
         transactions.insert(transaction.transaction_id(), transaction);
+    } else {
+        error!("Failed to get amount: {:?}", transaction);
     }
 }
 
@@ -79,8 +84,17 @@ fn process_dispute_transaction(
             if let Some(amount) = prev_transaction.amount() {
                 account.hold(amount);
                 prev_transaction.set_dispute(true);
+            } else {
+                error!("Failed to get amount: {:?}", prev_transaction);
             }
+        } else {
+            error!(
+                "Previous transaction already in dispute or incorrect client: {:?}",
+                transaction
+            );
         }
+    } else {
+        error!("Failed to get previous transaction: {:?}", transaction);
     }
 }
 
@@ -98,8 +112,17 @@ fn process_resolve_transaction(
             if let Some(amount) = prev_transaction.amount() {
                 account.release(amount);
                 prev_transaction.set_dispute(false);
+            } else {
+                error!("Failed to get amount: {:?}", prev_transaction);
             }
+        } else {
+            error!(
+                "Previous transaction not in dispute or incorrect client: {:?}",
+                transaction
+            );
         }
+    } else {
+        error!("Failed to get previous transaction: {:?}", transaction);
     }
 }
 
@@ -117,8 +140,17 @@ fn process_chargeback_transaction(
             if let Some(amount) = prev_transaction.amount() {
                 account.chargeback(amount);
                 prev_transaction.set_dispute(false);
+            } else {
+                error!("Failed to get amount: {:?}", prev_transaction);
             }
+        } else {
+            error!(
+                "Previous transaction not in dispute or incorrect client: {:?}",
+                transaction
+            );
         }
+    } else {
+        error!("Failed to get previous transaction: {:?}", transaction);
     }
 }
 

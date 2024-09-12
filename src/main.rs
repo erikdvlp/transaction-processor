@@ -1,14 +1,17 @@
 mod models;
 mod services;
+use log::error;
 use services::io::read_transactions;
 use services::io::write_accounts;
 use std::env;
 
 fn main() {
+    env_logger::init();
+
     // Process command line arguments
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: cargo run -- [INPUT_FILE] > [OUTPUT_FILE]");
+        error!("Usage: cargo run -- [INPUT_FILE] > [OUTPUT_FILE]");
         std::process::exit(1);
     }
 
