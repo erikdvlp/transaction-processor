@@ -11,6 +11,8 @@ use std::fmt::Write;
 pub type AccountsMap = HashMap<ClientID, Account>;
 pub type TransactionsMap = HashMap<TransactionID, Transaction>;
 
+/// Reads transactions from given input CSV file.
+/// Processes each parsed transaction one by one.
 pub fn read_transactions(input_file: &str) -> Result<Vec<Account>, Box<dyn Error>> {
     let mut reader = ReaderBuilder::new()
         .has_headers(true)
@@ -28,13 +30,14 @@ pub fn read_transactions(input_file: &str) -> Result<Vec<Account>, Box<dyn Error
     Ok(accounts.into_values().collect())
 }
 
+/// Writes account data to standard output.
 pub fn write_accounts(accounts: Vec<Account>) {
     println!("client,available,held,total,locked");
     let mut output = String::new();
     for account in accounts {
         writeln!(
             output,
-            "{},{},{},{},{}",
+            "{},{:.4},{:.4},{:.4},{}",
             account.client_id(),
             account.available(),
             account.held(),

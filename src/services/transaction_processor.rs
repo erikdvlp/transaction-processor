@@ -5,6 +5,8 @@ use crate::models::transaction::Transaction;
 use crate::models::transaction::TransactionType;
 use log::error;
 
+/// Processes a given transaction.
+/// Manages accounts and stores and updates past transactions.
 pub fn process_transaction(
     transaction: Transaction,
     accounts: &mut AccountsMap,
