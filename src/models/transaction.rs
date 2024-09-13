@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::id::{ClientID, TransactionID};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Transaction {
     #[serde(rename = "type")]
     transaction_type: TransactionType,

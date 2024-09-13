@@ -1,6 +1,8 @@
 use super::transaction_processor::process_transaction;
 use crate::models::account::Account;
-use crate::models::id::{ClientID, TransactionID};
+use crate::models::checkpoint::Checkpoint;
+use crate::models::id::ClientID;
+use crate::models::id::TransactionID;
 use crate::models::transaction::Transaction;
 use csv::ReaderBuilder;
 use log::error;
@@ -14,6 +16,7 @@ use std::io::Write as IOWrite;
 
 pub type AccountsMap = HashMap<ClientID, Account>;
 pub type TransactionsMap = HashMap<TransactionID, Transaction>;
+const CHECKPOINT_PATH: &str = "temp/checkpoint.json";
 
 /// Reads transactions from given input CSV file.
 /// Processes each parsed transaction one by one.
@@ -36,9 +39,12 @@ pub fn read_transactions(
         }
         line += 1;
         if line % block_size == 0 {
-            match write_checkpoint(&accounts, &transactions) {
+            match write_checkpoint(line, &accounts, &transactions) {
                 Ok(_) => info!("Wrote current state checkpoint to disk at line {}", line),
-                Err(e) => error!("Failed to write current state checkpoint to disk: {}", e),
+                Err(e) => error!(
+                    "Failed to write current state checkpoint to disk at line {}: {}",
+                    line, e
+                ),
             }
         }
     }
@@ -49,26 +55,27 @@ pub fn read_transactions(
 
 /// Writes the current state of accounts and transactions to disk.
 fn write_checkpoint(
+    line: u32,
     accounts: &AccountsMap,
     transactions: &TransactionsMap,
 ) -> Result<(), Box<dyn Error>> {
     fs::create_dir_all("temp")?;
 
-    let accounts_json = serde_json::to_string(accounts)?;
-    let mut accounts_file = File::create("temp/accounts.json")?;
-    accounts_file.write_all(accounts_json.as_bytes())?;
-
-    let transactions_json = serde_json::to_string(transactions)?;
-    let mut transactions_file = File::create("temp/transactions.json")?;
-    transactions_file.write_all(transactions_json.as_bytes())?;
+    let checkpoint = Checkpoint {
+        line,
+        accounts: accounts.clone(),
+        transactions: transactions.clone(),
+    };
+    let checkpoint_json = serde_json::to_string(&checkpoint)?;
+    let mut checkpoint_file = File::create(CHECKPOINT_PATH)?;
+    checkpoint_file.write_all(checkpoint_json.as_bytes())?;
 
     Ok(())
 }
 
 /// Deletes the current state of accounts and transactions from disk.
 fn clear_checkpoint() -> Result<(), Box<dyn Error>> {
-    fs::remove_file("temp/accounts.json")?;
-    fs::remove_file("temp/transactions.json")?;
+    fs::remove_file(CHECKPOINT_PATH)?;
 
     Ok(())
 }
