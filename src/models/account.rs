@@ -1,6 +1,8 @@
+use serde::Serialize;
+
 use super::id::ClientID;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Account {
     client_id: ClientID,
     available: f32,

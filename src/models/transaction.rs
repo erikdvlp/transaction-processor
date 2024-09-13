@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::id::{ClientID, TransactionID};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Transaction {
     #[serde(rename = "type")]
     transaction_type: TransactionType,
@@ -58,7 +58,7 @@ impl Transaction {
     }
 }
 
-#[derive(Copy, Clone, Debug, Deserialize, PartialEq)]
+#[derive(Copy, Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TransactionType {
     Deposit,
